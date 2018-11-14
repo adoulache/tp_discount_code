@@ -34,50 +34,50 @@ public class ShowDiscountCodeController extends HttpServlet {
 		try {
                     
                     DAO dao = new DAO(DataSourceFactory.getDataSource());
-                    List<DiscountEntity> discountCode = dao.findall();
-                    // On renseigne un attribut utilisé par la vue
-                    request.setAttribute("discountList", discountCode);
+                    String action = request.getParameter("action") ;
                     
-                    try {
-                        if(request.getParameter("action").equals("ADD")){
-                            
-                            String code = request.getParameter("code");
-                            String rate = request.getParameter("taux");
-                            if (code == null)
-                                    throw new Exception("Les paramètres n'ont pas été transmis");
-
-                            // on doit convertir cette valeur en entier (attention aux exceptions !)
-                            float taux = Float.valueOf(rate) ;
-                            dao.addDiscountCode(code, taux);
-                            
-                        }else if(request.getParameter("action").equals("DELETE")){
-                            try {
+                    if (action != null){
+                        try {
+                            if(action.equals("ADD")){
 
                                 String code = request.getParameter("code");
+                                String rate = request.getParameter("taux");
                                 if (code == null)
-                                        throw new Exception("Le paramètre \"code\" n'a pas été transmis");
+                                        throw new Exception("Les paramètres n'ont pas été transmis");
 
-                                dao.deleteDiscountCode(code);
+                                // on doit convertir cette valeur en entier (attention aux exceptions !)
+                                float taux = Float.valueOf(rate) ;
 
-                            } catch (Exception e){
-                                request.setAttribute("error", e.getMessage());
-                                request.getRequestDispatcher("Views/discountListView.jsp").forward(request, response);
+                                dao.addDiscountCode(code, taux);
+
+                            }else if(action.equals("DELETE")){
+                                try {
+
+                                    String code = request.getParameter("code");
+                                    if (code == null)
+                                            throw new Exception("Le paramètre \"code\" n'a pas été transmis");
+
+                                    dao.deleteDiscountCode(code);
+
+                                } catch (Exception e){
+                                    request.setAttribute("error", e.getMessage());
+                                    request.getRequestDispatcher("Views/discountListView.jsp").forward(request, response);
+                                }
                             }
+
+                        } catch (Exception e){
+                            request.setAttribute("error", e.getMessage());
                         }
-                    } catch (Exception e){
-                        request.setAttribute("error", e.getMessage());
-                        request.getRequestDispatcher("Views/discountListView.jsp").forward(request, response);
                     }
                     
-                    //List<DiscountEntity> discountCode = dao.findall();
+                    List<DiscountEntity> discountCode = dao.findall();
                     // On renseigne un attribut utilisé par la vue
                     request.setAttribute("discountList", discountCode);
                     // On redirige vers la vue
                     request.getRequestDispatcher("Views/discountListView.jsp").forward(request, response);
 
 		} catch (ServletException | IOException | DAOException e) {
-                    request.setAttribute("error", e.getMessage());			
-                    request.getRequestDispatcher("Views/discountListView.jsp").forward(request, response);
+                    request.setAttribute("error", e.getMessage());
 		}
     }
 
